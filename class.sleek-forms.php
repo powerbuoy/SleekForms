@@ -264,7 +264,8 @@ class SleekForms {
 		}
 
 		# Render the form/error message
-		$return = "<h2>$title</h2>";
+		$return = '<div class="sleek-form slek-form--' . $slug . '">';
+		$return .= "<h2>$title</h2>";
 		$return .= $content;
 
 		# Form has been successfully submitted
@@ -279,6 +280,8 @@ class SleekForms {
 
 			$return .= $form->render();
 		}
+
+		$return .= '</div>';
 
 		return $return;
 	}

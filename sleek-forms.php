@@ -2,7 +2,7 @@
 /*
 	Plugin Name: Sleek Forms
 	Plugin URI: http://andreaslagerkvist.com/projects/sleek-forms/
-	Description: A lightweight, modern and accessible form plug-in.
+	Description: A lightweight, modern and accessible WordPress form plug-in.
 	Version: 0.0.0
 	Author: Andreas Lagerkvist
 	Author URI: http://andreaslagerkvist.com
