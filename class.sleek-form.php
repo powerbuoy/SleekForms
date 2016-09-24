@@ -445,7 +445,7 @@ class SleekForm {
 		}
 		# If not - set checked based on whether it was set by user
 		else {
-			$checked = isset($f['checked']) ? true : false;
+			$checked = (isset($f['checked']) and $f['checked']) ? true : false;
 		}
 
 		return [

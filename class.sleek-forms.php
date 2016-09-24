@@ -237,19 +237,19 @@ class SleekForms {
 				$mailTemplate = self::getTemplate('template', ['data' => $formData]);
 
 				# Try to send an email
-				if (!wp_mail($recipients, $emailSubject, $mailTemplate, "Content-type: text/html\r\n")) {
-					$errors = true;
-
-					if (defined('DOING_AJAX') and DOING_AJAX) {
-						return json_encode(array('success' => false, 'errors' => $form->errors(), 'msg' => 'WP_Mail() failed.'));
-					}
-				}
-				# Email wasnt sent :/
-				else {
+				if (wp_mail($recipients, $emailSubject, $mailTemplate, "Content-type: text/html\r\n")) {
 					$done = true;
 
 					if (defined('DOING_AJAX') and DOING_AJAX) {
 						return json_encode(array('success' => $form->data(), 'msg' => $successText));
+					}
+				}
+				# Email wasnt sent :/
+				else {
+					$errors = true;
+
+					if (defined('DOING_AJAX') and DOING_AJAX) {
+						return json_encode(array('success' => false, 'errors' => $form->errors(), 'msg' => 'WP_Mail() failed.'));
 					}
 				}
 			}
@@ -264,13 +264,13 @@ class SleekForms {
 		}
 
 		# Render the form/error message
-		$return = '<div class="sleek-form slek-form--' . $slug . '">';
+		$return = '<div class="sleek-form sleek-form--' . $slug . '">';
 		$return .= "<h2>$title</h2>";
 		$return .= $content;
 
 		# Form has been successfully submitted
 		if ($done) {
-			$return = wpautop($successText);
+			$return .= wpautop($successText);
 		}
 		# Form hasn't been submitted, or there's an error
 		else {
