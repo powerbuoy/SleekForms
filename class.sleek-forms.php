@@ -199,7 +199,7 @@ class SleekForms {
 
 		# Store all the fields in a way the form class expects
 		foreach ($formFields as $field) {
-			$fieldSlug = $slug . '_' . str_replace('-', '_', sanitize_title($field['sleek_form_field_label']));
+			$fieldSlug = $slug . '_' . str_replace('-', '_', sanitize_title($field['sleek_form_field_label'])); # TODO: $field['sleek_form_field_name']
 
 			$fields[] = [
 				'name' => $fieldSlug,
@@ -241,7 +241,7 @@ class SleekForms {
 					$done = true;
 
 					if (defined('DOING_AJAX') and DOING_AJAX) {
-						return json_encode(array('success' => $form->data(), 'msg' => $successText));
+						return json_encode(array('success' => $form->data(), 'message' => $successText));
 					}
 				}
 				# Email wasnt sent :/
@@ -249,7 +249,7 @@ class SleekForms {
 					$errors = true;
 
 					if (defined('DOING_AJAX') and DOING_AJAX) {
-						return json_encode(array('success' => false, 'errors' => $form->errors(), 'msg' => 'WP_Mail() failed.'));
+						return json_encode(array('success' => false, 'errors' => $form->errors(), 'message' => 'wp_mail() failed.'));
 					}
 				}
 			}
@@ -258,7 +258,7 @@ class SleekForms {
 				$errors = true;
 
 				if (defined('DOING_AJAX') and DOING_AJAX) {
-					return json_encode(array('success' => false, 'errors' => $form->errors(), 'msg' => $errorText));
+					return json_encode(array('success' => false, 'errors' => $form->errors(), 'message' => $errorText));
 				}
 			}
 		}
