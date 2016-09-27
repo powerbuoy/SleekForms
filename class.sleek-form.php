@@ -50,17 +50,28 @@ class SleekForm {
 		return $this;
 	}
 
+	public function getInputValue ($name) {
+		$method = $this->method == 'post' ? $_POST : $_GET;
+
+		# Name is array
+		if (strstr($name, '[')) {
+			return SleekFormUtils::getValueByPath($method, $name);
+		}
+
+		# Name is not array
+		return isset($method[$name]) ? $method[$name] : '';
+	}
+
 	public function validate () {
 		$this->errors = [];
 		$valid = true;
-		$method = $this->method == 'post' ? $_POST : $_GET;
 
 		foreach ($this->fields as $field) {
-			$value = isset($method[$field['name']]) ? $method[$field['name']] : '';
+			$value = $this->getInputValue($field['name']);
 
 			if ($field['type'] == 'fieldset') {
 				foreach ($field['fields'] as $fsField) {
-					$fsValue = isset($method[$fsField['name']]) ? $method[$fsField['name']] : '';
+					$fsValue = $this->getInputValue($fsField['name']);
 
 					if (!$this->validateField($fsField, $fsValue)) {
 						$valid = false;
@@ -134,8 +145,9 @@ class SleekForm {
 			# Field should be same as other field
 			if (substr($f['pattern'], 0, 2) == '==') {
 				$otherField = substr($f['pattern'], 2);
+				$otherFieldValue = $this->getInputValue($otherField);
 
-				if ($v != $method[$otherField]) {
+				if ($v != $otherFieldValue) {
 					$this->errors[$f['name']] = $f['error'] ? $f['error'] : 'This field needs to be the same as ' . $otherField . '.';
 
 					return false;
@@ -248,6 +260,9 @@ class SleekForm {
 		# Checked
 		$checked = $field['checked'] ? ' checked' : '';
 
+		# Multiple
+		$multiple = $field['multiple'] ? ' multiple' : '';
+
 		# Readonly
 		$readonly = $field['readonly'] ? ' readonly' : '';
 
@@ -294,10 +309,11 @@ class SleekForm {
 
 			# Select elements
 			case 'select' :
-				$html .= $label . '<select name="' . $field['name'] . '"' . $id . $readonly . $disabled . $attributes . '>';
+				$html .= $label . '<select name="' . $field['name'] . '"' . $id . $readonly . $disabled . $attributes . $multiple . '>';
+
+				$selected = '';
 
 				foreach ($field['options'] as $k => $v) {
-					$selected = (isset($method[$field['name']]) and $method[$field['name']] == $v) ? ' selected' : '';
 					$html .= '<option value="' . $k . '"' . $selected . '>' . $v . '</option>';
 				}
 
@@ -421,9 +437,10 @@ class SleekForm {
 		static $i = 0;
 
 		$method = $this->method == 'post' ? $_POST : $_GET;
-		$value = isset($method[$f['name']]) ? $method[$f['name']] : '';
+		$value = $this->getInputValue($f['name']);
 
 		# If form has been submitted - set checked based on POST/GET
+		# TODO: Add support for name="questions[39][]" for example
 		if ($this->submit() and isset($f['value'])) {
 			# Field as part of an array of fields
 			if (strpos($f['name'], '[]') !== false) {
@@ -452,14 +469,14 @@ class SleekForm {
 			'name'			=> $f['name'],
 			'id'			=> $this->id . '-' . $f['name'] . $i++,
 			'type'			=> isset($f['type']) ? $f['type'] : 'text',
-			'value'			=> isset($f['value']) ? $f['value'] : $value,
+			'value'			=> isset($f['value']) ? $f['value'] : $value, # TODO: Submitted value ($value) should always come first??
 			'label'			=> isset($f['label']) ? $f['label'] : false,
 			'options'		=> isset($f['options']) ? $f['options'] : false,
 			'fields'		=> isset($f['fields']) ? $f['fields'] : [],
 			'error'			=> isset($f['error']) ? $f['error'] : false,
 			'legend'		=> isset($f['legend']) ? $f['legend'] : false,
 			'placeholder'	=> isset($f['placeholder']) ? $f['placeholder'] : false,
-			'required'		=> isset($f['required']) ? $f['required'] : false,
+			'required'		=> (isset($f['required']) and $f['required']) ? $f['required'] : false,
 			'pattern'		=> isset($f['pattern']) ? $f['pattern'] : false,
 			'class'			=> isset($f['class']) ? $f['class'] : false,
 			'checked'		=> $checked,
@@ -470,7 +487,8 @@ class SleekForm {
 			'max'			=> isset($f['max']) ? $f['max'] : false,
 			'step'			=> isset($f['step']) ? $f['step'] : false,
 			'attributes'	=> isset($f['attributes']) ? $f['attributes'] : [],
-			'validation'	=> isset($f['validation']) ? $f['validation'] : false
+			'validation'	=> isset($f['validation']) ? $f['validation'] : false,
+			'multiple'		=> (isset($f['multiple']) and $f['multiple']) ? true : false
 		];
 	}
 
@@ -573,5 +591,70 @@ class SleekForm {
 		}
 
 		return $this->requiredSymbol;
+	}
+}
+
+# Thanks: http://stackoverflow.com/questions/27929875/how-to-write-getter-setter-to-access-multi-level-array-by-key-names#answer-27930060
+class SleekFormUtils {
+	/**
+	 * Gets the value from input based on path.
+	 * Handles objects, arrays and scalars. Nesting can be mixed.
+	 * E.g.: $input->a->b->c = 'val' or $input['a']['b']['c'] = 'val' will
+	 * return "val" with path "a[b][c]".
+	 * @see Utils::arrayParsePath
+	 * @param mixed $input
+	 * @param string $path
+	 * @param mixed $default Optional default value to return on failure (null)
+	 * @return NULL|mixed NULL on failure, or the value on success (which may also be NULL)
+	 */
+	public static function getValueByPath($input,$path,$default=null) {
+		if ( !(isset($input) && (static::isIterable($input) || is_scalar($input))) ) {
+			return $default; // null already or we can't deal with this, return early
+		}
+		$pathArray = static::arrayParsePath($path);
+		$last = &$input;
+		foreach ( $pathArray as $key ) {
+			if ( is_object($last) && property_exists($last,$key) ) {
+				$last = &$last->$key;
+			} else if ( (is_scalar($last) || is_array($last)) && isset($last[$key]) ) {
+				$last = &$last[$key];
+			} else {
+				return $default;
+			}
+		}
+		return $last;
+	}
+
+	/**
+	 * Parses an array path like a[b][c] into a lookup array like array('a','b','c')
+	 * @param string $path
+	 * @return array
+	 */
+	public static function arrayParsePath($path) {
+		preg_match_all('/\\[([^[]*)]/',$path,$matches);
+		if ( isset($matches[1]) ) {
+			$matches = $matches[1];
+		} else {
+			$matches = array();
+		}
+		preg_match('/^([^[]+)/',$path,$name);
+		if ( isset($name[1]) ) {
+			array_unshift($matches,$name[1]);
+		} else {
+			$matches = array();
+		}
+		return $matches;
+	}
+
+	/**
+	 * Check if a value/object/something is iterable/traversable,
+	 * e.g. can it be run through a foreach?
+	 * Tests for a scalar array (is_array), an instance of Traversable, and
+	 * and instance of stdClass
+	 * @param mixed $value
+	 * @return boolean
+	 */
+	public static function isIterable($value) {
+		return is_array($value) || $value instanceof Traversable || $value instanceof stdClass;
 	}
 }
