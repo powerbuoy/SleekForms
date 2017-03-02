@@ -1,7 +1,7 @@
 <?php
 /*
 	Plugin Name: Sleek Forms
-	Plugin URI: http://andreaslagerkvist.com/projects/sleek-forms/
+	Plugin URI: https://github.com/powerbuoy/sleek-form/
 	Description: A lightweight, modern and accessible WordPress form plug-in.
 	Version: 0.0.0
 	Author: Andreas Lagerkvist

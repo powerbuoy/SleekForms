@@ -20,25 +20,25 @@ class SleekForms {
 		add_shortcode('sleekform', function ($args) {
 			if (function_exists('acf_add_local_field_group')) {
 				if (!isset($args['id'])) {
-					return wpautop(__('SleekForms Error: You have to specify a form ID', 'sleekforms'));
+					return wpautop(__('SleekForm Error: You have to specify a form ID', 'sleekform'));
 				}
 
 				return self::renderForm($args['id']);
 			}
 
-			return wpautop(__('SleekForms requires the Advanced Custom Fields function acf_add_local_field_group()', 'sleekforms'));
+			return wpautop(__('SleekForm requires the Advanced Custom Fields function acf_add_local_field_group()', 'sleekform'));
 		});
 	}
 
 	private static function registerPostType () {
-		register_post_type('sleek_forms', [
+		register_post_type('sleek_form', [
 			'labels' => [
-				'name' => __('Sleek Forms', 'sleekforms'),
-				'singular_label' => __('Sleek Form', 'sleekforms')
+				'name' => __('Sleek Form', 'sleekform'),
+				'singular_label' => __('Sleek Form', 'sleekform')
 			],
 			'rewrite' => [
 				'with_front' => false,
-				'slug' => __('sleek-forms', 'sleekforms')
+				'slug' => __('sleek-form', 'sleekform')
 			],
 			'public' => true,
 			'publicly_queryable' => false,
@@ -54,7 +54,7 @@ class SleekForms {
 	private static function registerACF () {
 		acf_add_local_field_group([
 			'key' => 'sleek_form_group',
-			'title' => __('Sleek Form Settings', 'sleekforms'),
+			'title' => __('Sleek Form Settings', 'sleekform'),
 			'location' => [
 				[
 					[
@@ -68,7 +68,7 @@ class SleekForms {
 				[
 					'key' => 'sleek_form_fields',
 					'name' => 'sleek_form_fields',
-					'label' => __('Form Fields', 'sleekforms'),
+					'label' => __('Form Fields', 'sleekform'),
 					'type' => 'repeater',
 					'required' => true,
 					'sub_fields' => [
@@ -76,20 +76,20 @@ class SleekForms {
 							'key' => 'sleek_form_field_label',
 							'name' => 'sleek_form_field_label',
 							'type' => 'text',
-							'label' => __('Label', 'sleekforms'),
+							'label' => __('Label', 'sleekform'),
 							'required' => true
 						],
 						[
 							'key' => 'sleek_form_field_placeholder',
 							'name' => 'sleek_form_field_placeholder',
 							'type' => 'text',
-							'label' => __('Placeholder', 'sleekforms')
+							'label' => __('Placeholder', 'sleekform')
 						],
 						[
 							'key' => 'sleek_form_field_type',
 							'name' => 'sleek_form_field_type',
 							'type' => 'select',
-							'label' => __('Type', 'sleekforms'),
+							'label' => __('Type', 'sleekform'),
 							'required' => true,
 							'choices' => [
 								'text' => 'text',
@@ -109,8 +109,8 @@ class SleekForms {
 							'key' => 'sleek_form_field_required',
 							'name' => 'sleek_form_field_required',
 							'type' => 'true_false',
-							'label' => __('Required Field', 'sleekforms'),
-							'message' => __('Required', 'sleekforms')
+							'label' => __('Required Field', 'sleekform'),
+							'message' => __('Required', 'sleekform')
 						]
 					]
 				],
@@ -118,16 +118,16 @@ class SleekForms {
 					'key' => 'sleek_form_submit_text',
 					'name' => 'sleek_form_submit_text',
 					'type' => 'text',
-					'label' => __('Submit Button Text', 'sleekforms'),
-					'default_value' => __('Submit', 'sleekforms'),
+					'label' => __('Submit Button Text', 'sleekform'),
+					'default_value' => __('Submit', 'sleekform'),
 					'required' => true
 				],
 				[
 					'key' => 'sleek_form_recipients',
 					'name' => 'sleek_form_recipients',
 					'type' => 'text',
-					'label' => __('Recipients', 'sleekforms'),
-					'instructions' => __('Separate multiple e-mail addresses with a comma', 'sleekforms'),
+					'label' => __('Recipients', 'sleekform'),
+					'instructions' => __('Separate multiple e-mail addresses with a comma', 'sleekform'),
 					'default_value' => get_option('admin_email'),
 					'required' => true
 				],
@@ -135,24 +135,24 @@ class SleekForms {
 					'key' => 'sleek_form_success_text',
 					'name' => 'sleek_form_success_text',
 					'type' => 'text',
-					'label' => __('Thank you message', 'sleekforms'),
-					'default_value' => __('Thank you.', 'sleekforms'),
+					'label' => __('Thank you message', 'sleekform'),
+					'default_value' => __('Thank you.', 'sleekform'),
 					'required' => true
 				],
 				[
 					'key' => 'sleek_form_error_text',
 					'name' => 'sleek_form_error_text',
 					'type' => 'text',
-					'label' => __('Error message', 'sleekforms'),
-					'default_value' => __('Something went wrong, please try again.', 'sleekforms'),
+					'label' => __('Error message', 'sleekform'),
+					'default_value' => __('Something went wrong, please try again.', 'sleekform'),
 					'required' => true
 				],
 				[
 					'key' => 'sleek_form_email_subject',
 					'name' => 'sleek_form_email_subject',
 					'type' => 'text',
-					'label' => __('E-mail subject', 'sleekforms'),
-					'default_value' => __('From your website', 'sleekforms'),
+					'label' => __('E-mail subject', 'sleekform'),
+					'default_value' => __('From your website', 'sleekform'),
 					'required' => true
 				]
 			]
@@ -164,7 +164,7 @@ class SleekForms {
 
 		# Make sure a sleek form with this ID exists
 		if (!$formPost or $formPost->post_type !== 'sleek_forms') {
-			return sprintf(__('No form with ID %s', 'sleekforms'), $id);
+			return sprintf(__('No form with ID %s', 'sleekform'), $id);
 		}
 
 		# Store all the variables we need
@@ -176,23 +176,23 @@ class SleekForms {
 		$recipients = $recipients ? $recipients : get_option('admin_email');
 
 		$submitText = get_field('sleek_form_submit_text', $id);
-		$submitText = $submitText ? $submitText : __('Submit', 'sleekforms');
+		$submitText = $submitText ? $submitText : __('Submit', 'sleekform');
 
 		$successText = get_field('sleek_form_success_text', $id);
-		$successText = $successText ? $successText : __('Thank you.', 'sleekforms');
+		$successText = $successText ? $successText : __('Thank you.', 'sleekform');
 
 		$emailSubject = get_field('sleek_form_email_subject', $id);
-		$emailSubject = $emailSubject ? $emailSubject : __('From your website', 'sleekforms');
+		$emailSubject = $emailSubject ? $emailSubject : __('From your website', 'sleekform');
 
 		$errorText = get_field('sleek_form_error_text', $id);
-		$errorText = $errorText ? $errorText : __('Something went wrong, please try again.', 'sleekforms');
+		$errorText = $errorText ? $errorText : __('Something went wrong, please try again.', 'sleekform');
 
 		$formFields = get_field('sleek_form_fields', $id);
 		$fields = [];
 
 		# Make sure some fields are defined
 		if (!$formFields) {
-			return sprintf(__('No form fields defined for form %s', 'sleekforms'), $id);
+			return sprintf(__('No form fields defined for form %s', 'sleekform'), $id);
 		}
 
 		# return "Creating form with title: $title, slug: $slug, content: $content, recipients: $recipients, submitText: $submitText and fields " . count($fields);

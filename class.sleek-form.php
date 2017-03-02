@@ -343,7 +343,7 @@ class SleekForm {
 			case 'captcha' :
 				$html .= '<div class="captcha-wrap"><div class="g-recaptcha" data-sitekey="' . $this->args['recaptcha_site_key'] . '"></div>' .
 						(isset($this->errors[$field['name']]) ?
-							'<strong class="error">' . $this->errors[$field['name']] . '</strong>' :
+							'<strong>' . $this->errors[$field['name']] . '</strong>' :
 							''
 						) . '</div>';
 
@@ -360,7 +360,7 @@ class SleekForm {
 		$html .= $field['description'] ? '<small>' . $field['description'] . '</small>' : '';
 
 		# Error?
-		$html .= (isset($this->errors[$field['name']]) and $field['type'] != 'captcha') ? '<strong class="error">' . $this->errors[$field['name']] . '</strong>' : '';
+		$html .= (isset($this->errors[$field['name']]) and $field['type'] != 'captcha') ? '<strong>' . $this->errors[$field['name']] . '</strong>' : '';
 
 		if ($field['type'] != 'hidden' and $field['type'] != 'html' and $field['type'] != 'captcha') {
 			$html .= '</' . $this->wrapEl . '>';
